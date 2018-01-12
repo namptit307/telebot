@@ -18,7 +18,7 @@ setup(
     license='Apache-2.0',
     scripts=['bin/telebot'],
     url='https://github.com/ntk148v/telebot/',
-    packages=['telebot', 'telebot.plugins'],
+    packages=['telebot'],
     include_package_data=True,
     install_requires=[],
     classifiers=[
