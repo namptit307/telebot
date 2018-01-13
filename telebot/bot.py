@@ -37,10 +37,10 @@ class Bot(object):
         LOG.warning('Update "%s" caused error "%s"', update, error)
 
     def notification_to_user(self, bot, update):
-        if '@namptit307' in update.message.text:
+        if '@namnh307' in update.message.text:
             msg = 'You have a message from {0} with content: {1}'.format(
-                update.message.username, update.message.text)
-            bot.send_message(chat_id='<id_sender', text=msg)
+                update.message.from_user.username, update.message.text)
+            bot.send_message(chat_id='<id_sender>', text=msg)
 
     def run(self):
         self.updater.start_polling(clean=True)
@@ -48,7 +48,7 @@ class Bot(object):
 
     def start(self, bot, update):
         bot.send_message(chat_id=update.message.chat_id,
-                         text='Hanno! I\'m Telebot for notification')
+                         text='Hello! I\'m Telebot for notification')
 
     def stop(self):
         self.updater.stop()
