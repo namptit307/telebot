@@ -32,28 +32,21 @@ class Bot(object):
 
     def init_handlers(self):
         """Init all command handlers"""
-        self.init_plugins()
         # Init general command handlers
         start_handler = CommandHandler('start', self.start)
         self.dispatcher.add_handler(start_handler)
-        help_handler = CommandHandler('help', self.help)
-        self.dispatcher.add_handler(help_handler)
-        # Init additional plugins handlers
-        for plugin in self.plugins.keys():
-            _handler = CommandHandler(plugin, self.plugins[plugin]['handler'])
-            if plugin in settings.JOB_PLUGINS:
-                _handler = CommandHandler(plugin,
-                                          self.plugins[plugin]['handler'],
-                                          pass_args=True,
-                                          pass_job_queue=True,
-                                          pass_chat_data=True)
-
-            self.dispatcher.add_handler(_handler)
+        # Listen notification
+        file_handler = MessageHandler(filters='@namnh307',
+                                      callback=self.notification_to_user)
+        self.dispatcher.add_handler(file_handler)
         self.dispatcher.add_error_handler(self.error)
 
     def error(self, bot, update, error):
         """Log Errors caused by Updates."""
         LOG.warning('Update "%s" caused error "%s"', update, error)
+
+    def notification_to_user(self, bot, update):
+        pass
 
     def _get_commands(self):
         commands = []
@@ -69,8 +62,7 @@ class Bot(object):
 
     def start(self, bot, update):
         bot.send_message(chat_id=update.message.chat_id,
-                         text='Hallo! I\'m Telebot, please type /help for '
-                              'more info')
+                         text='Hanno! I\'m Telebot for notification')
 
     def stop(self):
         self.updater.stop()
@@ -80,43 +72,3 @@ class Bot(object):
         self.updater.idle()
         return
 
-    def help(self, bot, update):
-        commands = self._get_commands()
-        command_names = [cmd[0].strip('/') for cmd in commands]
-
-        text = 'Please type: /help <command> with <command> is optional.'
-        user_input = update.message.text.split(' ')
-        if len(user_input) == 1:
-            text = emojies.information_source + \
-                ' The following commands are available:\n'
-
-            for command in commands:
-                text += command[0] + '-' + command[1] + '\n'
-        elif len(user_input) == 2 and user_input[1] in command_names:
-            text = emojies.information_source + ' ' + \
-                self.plugins[user_input[1]]['usage']
-
-        bot.send_message(chat_id=update.message.chat_id, text=text)
-
-    def init_plugins(self):
-        for _, name, _ in pkgutil.iter_modules(telebot.plugins.__path__):
-            try:
-                LOG.debug('Plugin: {}' . format(name))
-                module = importlib.import_module('telebot.plugins.' + name)
-                module_name = module.__name__.split('.')[-1]
-                _info = {
-                    'whatis': 'Unknown command',
-                    'usage': 'Unknown usage',
-                    'handler': getattr(module, 'handle')
-                }
-
-                if module.__doc__:
-                    _info['whatis'] = module.__doc__.split('\n')[0]
-                    _info['usage'] = module.__doc__
-                LOG.info(_info)
-                self.plugins[module_name] = _info
-            except:
-                LOG.warning('Import failed on module {}, module not loaded!' .
-                            format(name))
-                LOG.warning('{}' . format(sys.exc_info()[0]))
-                LOG.warning('{}' . format(traceback.format_exc()))
