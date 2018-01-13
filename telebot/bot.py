@@ -27,8 +27,8 @@ class Bot(object):
         start_handler = CommandHandler('start', self.start)
         self.dispatcher.add_handler(start_handler)
         # Listen notification
-        file_handler = MessageHandler(filters=Filters.chat(
-            username='namptit307'), callback=self.notification_to_user)
+        file_handler = MessageHandler(filters=Filters.text,
+                                      callback=self.notification_to_user)
         self.dispatcher.add_handler(file_handler)
         self.dispatcher.add_error_handler(self.error)
 
@@ -37,8 +37,10 @@ class Bot(object):
         LOG.warning('Update "%s" caused error "%s"', update, error)
 
     def notification_to_user(self, bot, update):
-        LOG.warning(update.message)
-        # bot.send_message(chat_id="<id_sender>", text=update.message)
+        if '@namptit307' in update.message.text:
+            msg = 'You have a message from {0} with content: {1}'.format(
+                update.message.username, update.message.text)
+            bot.send_message(chat_id='<id_sender', text=msg)
 
     def run(self):
         self.updater.start_polling(clean=True)
